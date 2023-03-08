@@ -1,41 +1,97 @@
 import * as React from "react";
-import Avatar from "@mui/material/Avatar";
+import { useDispatch } from "react-redux";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
-import Link from "@mui/material/Link";
+import { Link } from "react-router-dom";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import { register as registerUser } from "../../features/user/userSlice";
+import LogoImage from "../../assets/images/showcase-logo.png";
+import { messages } from "../../constants/messages";
+import AlertBox from "../../component/alert/AlertBox";
+import { addAlert } from "../../features/alert/alertSlice";
+
+const schema = yup.object().shape({
+  fullName: yup.string().required(messages.fullNameRequired),
+  email: yup.string().email().required(messages.emailRequired),
+  password: yup.string().required(messages.passwordRequired).min(6),
+});
 
 export default function Register() {
-  const handleSubmit = (event) => {
-    event.preventDefault();
+  const dispatch = useDispatch();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm({
+    resolver: yupResolver(schema),
+  });
+
+  const onSubmit = async (data) => {
+    const res = await dispatch(registerUser(data));
+    if (res?.meta?.requestStatus === "rejected") {
+      await dispatch(
+        addAlert({
+          msg: res.payload,
+          type: "error",
+        })
+      );
+    } else {
+      await dispatch(
+        addAlert({
+          msg: "Registration successfull",
+          type: "success",
+        })
+      );
+      reset();
+    }
   };
 
   return (
-    <Container component="main" maxWidth="xs">
+    <Container
+      component="main"
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "100vh",
+        textAlign: "center",
+      }}
+    >
       <CssBaseline />
-      <Box
-        sx={{
-          marginTop: 8,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
-        <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
-          <LockOutlinedIcon />
-        </Avatar>
-        <Typography component="h1" variant="h5">
-          Sign up
+      <AlertBox />
+      <Box>
+        <Box>
+          <img src={LogoImage} alt="Logo" />
+        </Box>
+        <Typography variant="h6">
+          Sign up to show your work and get discovered.
         </Typography>
-        <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
+        <Box
+          component="form"
+          noValidate
+          onSubmit={handleSubmit(onSubmit)}
+          sx={{ mt: 3, maxWidth: "400px" }}
+        >
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <TextField name="fullName" required fullWidth label="Full Name" />
+              <TextField
+                name="fullName"
+                required
+                fullWidth
+                label="Full Name"
+                {...register("fullName")}
+                error={!!errors?.fullName}
+                helperText={errors?.fullName?.message}
+              />
             </Grid>
             <Grid item xs={12}>
               <TextField
@@ -43,6 +99,9 @@ export default function Register() {
                 fullWidth
                 label="Email Address"
                 name="email"
+                {...register("email")}
+                error={!!errors?.email}
+                helperText={errors?.email?.message}
               />
             </Grid>
             <Grid item xs={12}>
@@ -52,6 +111,9 @@ export default function Register() {
                 name="password"
                 label="Password"
                 type="password"
+                {...register("password")}
+                error={!!errors?.password}
+                helperText={errors?.password?.message}
               />
             </Grid>
           </Grid>
@@ -61,12 +123,13 @@ export default function Register() {
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
           >
-            Sign Up
+            Create my account
           </Button>
           <Grid container justifyContent="flex-end">
             <Grid item>
-              <Link href="/login" variant="body2">
-                Already have an account? Sign in
+              Already have an account?{" "}
+              <Link to="/login" variant="body2">
+                Sign in
               </Link>
             </Grid>
           </Grid>
