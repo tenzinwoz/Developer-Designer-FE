@@ -9,6 +9,12 @@ const alertSlice = createSlice({
   name: "alert",
   initialState,
   reducers: {
+    removeAlert: (state, action) => {
+      const newList = state.alerts.filter(
+        (alert) => alert?.id !== action.payload
+      );
+      state.alerts = newList;
+    },
     addAlert: (state, action) => {
       const customId = uniqid();
       state.alerts.unshift({
@@ -16,9 +22,13 @@ const alertSlice = createSlice({
         type: action.payload.type,
         id: customId,
       });
+      //TODO: Can i remove this error after sometime
+      // setTimeout(()=>{
+      //   removeAlert(customId)
+      // },5000)
     },
   },
 });
 
-export const { addAlert } = alertSlice.actions;
+export const { addAlert, removeAlert } = alertSlice.actions;
 export default alertSlice.reducer;

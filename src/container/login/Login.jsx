@@ -11,30 +11,41 @@ import Container from "@mui/material/Container";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { register as registerUser } from "../../features/user/userSlice";
+import { login as loginUser } from "../../features/user/userSlice";
 import LogoImage from "../../assets/images/showcase-logo.png";
 import { messages } from "../../constants/messages";
+import { addAlert } from "../../features/alert/alertSlice";
+import { useNavigate } from "react-router-dom";
 
 const schema = yup.object().shape({
-  fullName: yup.string().required(messages.fullNameRequired),
   email: yup.string().email().required(messages.emailRequired),
   password: yup.string().required(messages.passwordRequired).min(6),
 });
 
 export default function Register() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
   } = useForm({
     resolver: yupResolver(schema),
   });
 
-  const onSubmit = (data) => {
-    console.log(data);
-    dispatch(registerUser(data));
+  const onSubmit = async (data) => {
+    console.log("submit");
+    const res = await dispatch(loginUser(data));
+    if (res?.meta?.requestStatus === "rejected") {
+      await dispatch(
+        addAlert({
+          msg: res.payload,
+          type: "error",
+        })
+      );
+    } else {
+      navigate("/dashboard");
+    }
   };
 
   return (
@@ -99,7 +110,7 @@ export default function Register() {
           <Grid container justifyContent="flex-end">
             <Grid item>
               Dont have an account?{" "}
-              <Link to="/login" variant="body2">
+              <Link to="/register" variant="body2">
                 Sign up
               </Link>
             </Grid>

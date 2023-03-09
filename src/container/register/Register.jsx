@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -14,7 +14,6 @@ import * as yup from "yup";
 import { register as registerUser } from "../../features/user/userSlice";
 import LogoImage from "../../assets/images/showcase-logo.png";
 import { messages } from "../../constants/messages";
-import AlertBox from "../../component/alert/AlertBox";
 import { addAlert } from "../../features/alert/alertSlice";
 
 const schema = yup.object().shape({
@@ -25,11 +24,12 @@ const schema = yup.object().shape({
 
 export default function Register() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
   } = useForm({
     resolver: yupResolver(schema),
   });
@@ -46,11 +46,11 @@ export default function Register() {
     } else {
       await dispatch(
         addAlert({
-          msg: "Registration successfull",
+          msg: messages.registrationSuccess,
           type: "success",
         })
       );
-      reset();
+      navigate("/dashboard");
     }
   };
 
@@ -67,7 +67,7 @@ export default function Register() {
       }}
     >
       <CssBaseline />
-      <AlertBox />
+
       <Box>
         <Box>
           <img src={LogoImage} alt="Logo" />

@@ -12,4 +12,6 @@ export const messages = {
   headlineRequired: "Headline is required!",
   skillsRequired: "Skills are required!",
   noProfile: "No profile found!",
+
+  registrationSuccess: "Registration successfull",
 };
